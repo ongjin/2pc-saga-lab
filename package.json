@@ -1,0 +1,25 @@
+{
+  "name": "2pc-saga-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "tsx src/setup.ts",
+    "demo": "tsx src/cli.ts",
+    "test": "vitest run --pool=forks --no-file-parallelism --passWithNoTests",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "diagrams": "mmdc -i docs/images/2pc-sequence.mmd -o docs/images/2pc-sequence.png && mmdc -i docs/images/saga-happy-sequence.mmd -o docs/images/saga-happy-sequence.png && mmdc -i docs/images/saga-compensation-sequence.mmd -o docs/images/saga-compensation-sequence.png && mmdc -i docs/images/crash-recovery-sequence.mmd -o docs/images/crash-recovery-sequence.png"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.15.0",
+    "@types/node": "^24.12.4",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  }
+}
