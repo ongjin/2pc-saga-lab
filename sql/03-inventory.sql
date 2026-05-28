@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS reservations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_reservations_order_id ON reservations(order_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reservations_order_id_sku_unique ON reservations(order_id, sku);
 
 INSERT INTO stocks (sku, qty)
 VALUES ('SKU-1', 10)
