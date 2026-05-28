@@ -8,6 +8,17 @@ const MAX_FINISH_ATTEMPTS = 3;
 export type TwoPhaseParticipantName = 'order-db' | 'payment-db' | 'inventory-db';
 export type TwoPhaseDecision = 'COMMIT' | 'ROLLBACK';
 
+export type TwoPhaseRecoveryOrder = {
+  orderId: string;
+  decision: TwoPhaseDecision;
+  events: DemoEvent[];
+};
+
+export type TwoPhaseRecoveryResult = {
+  events: DemoEvent[];
+  recoveredOrders: TwoPhaseRecoveryOrder[];
+};
+
 type TwoPhaseParticipant = {
   name: TwoPhaseParticipantName;
   db: postgres.Sql;
@@ -117,6 +128,10 @@ export async function finishTwoPhaseOrder(
 }
 
 export async function recoverTwoPhaseCommit(): Promise<DemoEvent[]> {
+  return (await recoverTwoPhaseCommitDetailed()).events;
+}
+
+export async function recoverTwoPhaseCommitDetailed(): Promise<TwoPhaseRecoveryResult> {
   const scans = await Promise.all(twoPhaseParticipants.map(scanPreparedTransactions));
   const preparedByOrder = new Map<string, Set<TwoPhaseParticipantName>>();
 
@@ -127,6 +142,7 @@ export async function recoverTwoPhaseCommit(): Promise<DemoEvent[]> {
   }
 
   const events: DemoEvent[] = [];
+  const recoveredOrders: TwoPhaseRecoveryOrder[] = [];
   for (const [orderId, participantSet] of preparedByOrder) {
     const isComplete = twoPhaseParticipants.every((participant) => participantSet.has(participant.name));
     const durableDecision = await readTwoPhaseDecision(orderId);
@@ -140,11 +156,15 @@ export async function recoverTwoPhaseCommit(): Promise<DemoEvent[]> {
     if (durableDecision === null && decision === 'COMMIT') {
       await recordTwoPhaseDecision(orderId, decision);
     }
-    events.push({ line: `[2PC][recovery] ${orderId} ${state} -> ${decision} PREPARED` });
-    events.push(...(await finishTwoPhaseOrder(orderId, decision)));
+    const orderEvents = [
+      { line: `[2PC][recovery] ${orderId} ${state} -> ${decision} PREPARED` },
+      ...(await finishTwoPhaseOrder(orderId, decision)),
+    ];
+    events.push(...orderEvents);
+    recoveredOrders.push({ orderId, decision, events: orderEvents });
   }
 
-  return events;
+  return { events, recoveredOrders };
 }
 
 async function scanPreparedTransactions(participant: TwoPhaseParticipant): Promise<PreparedScan[]> {
