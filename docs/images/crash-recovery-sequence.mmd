@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant C as 2PC Coordinator
+    participant R as Recovery
+    participant O as order-db
+    participant P as payment-db
+    participant I as inventory-db
+
+    C->>O: PREPARE TRANSACTION
+    C->>P: PREPARE TRANSACTION
+    C->>I: PREPARE TRANSACTION
+    C->>O: record durable COMMIT decision
+    C--xC: crash before participant commits
+    R->>O: query pg_prepared_xacts
+    R->>P: query pg_prepared_xacts
+    R->>I: query pg_prepared_xacts
+    R->>O: COMMIT PREPARED
+    R->>P: COMMIT PREPARED
+    R->>I: COMMIT PREPARED

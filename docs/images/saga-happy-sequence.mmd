@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant S as Saga Orchestrator
+    participant O as order-db
+    participant P as payment-db
+    participant I as inventory-db
+
+    S->>O: log STARTED order_created
+    S->>O: create order
+    S->>O: log DONE order_created
+    S->>P: charge payment
+    S->>O: log DONE payment_charged
+    S->>I: reserve stock
+    S->>O: log DONE stock_reserved
+    S->>O: confirm order
+    S->>O: log DONE order_confirmed

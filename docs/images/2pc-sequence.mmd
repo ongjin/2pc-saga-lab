@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant C as 2PC Coordinator
+    participant O as order-db
+    participant P as payment-db
+    participant I as inventory-db
+
+    C->>O: BEGIN#59; create + confirm order
+    C->>O: PREPARE TRANSACTION
+    O-->>C: prepared
+    C->>P: BEGIN#59; charge payment
+    C->>P: PREPARE TRANSACTION
+    P-->>C: prepared
+    C->>I: BEGIN#59; reserve stock
+    C->>I: PREPARE TRANSACTION
+    I-->>C: prepared
+    C->>O: COMMIT PREPARED
+    C->>P: COMMIT PREPARED
+    C->>I: COMMIT PREPARED
