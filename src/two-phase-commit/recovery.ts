@@ -146,14 +146,14 @@ export async function recoverTwoPhaseCommitDetailed(): Promise<TwoPhaseRecoveryR
   for (const [orderId, participantSet] of preparedByOrder) {
     const isComplete = twoPhaseParticipants.every((participant) => participantSet.has(participant.name));
     const durableDecision = await readTwoPhaseDecision(orderId);
-    const decision: TwoPhaseDecision = durableDecision ?? (isComplete ? 'COMMIT' : 'ROLLBACK');
+    const decision: TwoPhaseDecision = durableDecision ?? 'ROLLBACK';
     const state =
       durableDecision === null
         ? isComplete
-          ? 'all prepared'
+          ? 'no durable decision'
           : 'incomplete prepared set'
         : `durable ${durableDecision} decision`;
-    if (durableDecision === null && decision === 'COMMIT') {
+    if (durableDecision === null) {
       await recordTwoPhaseDecision(orderId, decision);
     }
     const orderEvents = [

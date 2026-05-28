@@ -25,6 +25,8 @@ Expected result:
 
 The CLI line `[2PC] all prepared -> COMMIT PREPARED` means the coordinator has reached and durably recorded the global `COMMIT` decision. It is not evidence that each participant's `COMMIT PREPARED` call finished; this crash path exits before those participant commit calls run.
 
+The durable decision is the source of truth during recovery. Prepared transactions without a matching `two_phase_decisions` row are treated as in-doubt and rolled back by this lab instead of being committed only because every participant reached `PREPARE`.
+
 Inspect normal table visibility:
 
 ```bash
@@ -56,7 +58,7 @@ npm run demo -- 2pc recover
 Expected recovery result:
 
 - Recovery finds prepared transactions for the same order across the participants.
-- The recovery path commits them with `COMMIT PREPARED`.
+- Because the crash path recorded a durable `COMMIT` decision, the recovery path commits them with `COMMIT PREPARED`.
 - `pg_prepared_xacts` is empty after recovery.
 - The CLI prints the recovered final state.
 

@@ -173,16 +173,19 @@ describe('two-phase commit', () => {
     expect(await countPreparedTransactions()).toBe(0);
   });
 
-  test('recovery commits when all participants are prepared', async () => {
+  test('recovery rolls back prepared participants without a durable decision', async () => {
     const req = request();
     await prepareAllParticipants(req);
 
-    await recoverTwoPhaseCommit();
+    const events = await recoverTwoPhaseCommit();
 
     const final = await readFinalState(req.orderId);
-    expect(final.order).toEqual({ status: 'CONFIRMED', qty: 1, amount: 10000 });
-    expect(final.payment).toEqual({ status: 'CHARGED', amount: 10000 });
-    expect(final.stock.qty).toBe(9);
+    expect(events).toContainEqual({
+      line: `[2PC][recovery] ${req.orderId} no durable decision -> ROLLBACK PREPARED`,
+    });
+    expect(final.order).toBeNull();
+    expect(final.payment).toBeNull();
+    expect(final.stock.qty).toBe(10);
     expect(await countPreparedTransactions()).toBe(0);
   });
 

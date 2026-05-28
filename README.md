@@ -52,6 +52,8 @@ npm run demo -- 2pc recover
 
 The 2PC crash command intentionally exits with code `1` after the coordinator records its commit decision and before participant `COMMIT PREPARED` calls finish. Run `npm run demo -- 2pc recover` afterward. Recovery is manual so the prepared transaction state and the Saga contrast stay visible. See [Crash Recovery Manual](docs/crash.manual.md) for inspection and recovery commands, including the Saga crash behavior.
 
+Recovery only commits prepared work when the durable coordinator decision is `COMMIT`. If prepared transactions exist without a row in `two_phase_decisions`, the recovery command records `ROLLBACK` and rolls them back instead of inferring commit from participant state alone.
+
 ## Scenarios
 
 | Scenario | 2PC | Saga |
