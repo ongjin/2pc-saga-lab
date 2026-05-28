@@ -16,3 +16,9 @@ CREATE TABLE IF NOT EXISTS saga_log (
   created_at  timestamptz DEFAULT now(),
   PRIMARY KEY (order_id, step)
 );
+
+CREATE TABLE IF NOT EXISTS two_phase_decisions (
+  order_id    uuid PRIMARY KEY,
+  decision    text NOT NULL CHECK (decision IN ('COMMIT', 'ROLLBACK')),
+  created_at  timestamptz DEFAULT now()
+);

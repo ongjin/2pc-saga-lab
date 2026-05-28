@@ -10,7 +10,7 @@ export type FinalState = {
 
 export async function resetAllData(): Promise<void> {
   await Promise.all([
-    orderDb`TRUNCATE saga_log, orders`,
+    orderDb`TRUNCATE saga_log, two_phase_decisions, orders`,
     paymentDb`TRUNCATE payments`,
     inventoryDb`TRUNCATE reservations, stocks`,
   ]);
