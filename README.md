@@ -72,4 +72,4 @@ npm run typecheck
 
 ## 연계 글
 
-연계 글이 공개되면 이 저장소에서 링크할 예정입니다.
+[2PC vs Saga — 분산 트랜잭션 두 패턴을 같은 데모로 짜봤다](https://zerry.co.kr/blog/2pc-vs-saga-distributed-transaction-lab)
